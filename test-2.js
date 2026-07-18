@@ -18,7 +18,7 @@ test('1', () => {
 		[1, 0], // C
 	]];
 
-	const labels = ['A', 'B', 'C'];
+	const labels = 'ABC';
 
 	setPointMap(Object.fromEntries(poly.flat().map(([x, y], i) => [`${x}:${y}`, labels[i]])));
 
@@ -42,7 +42,6 @@ test('2', () => {
 	]];
 
 	const labels = ['A', 'B', 'C'];
-
 	setPointMap(Object.fromEntries(poly.flat().map(([x, y], i) => [`${x}:${y}`, labels[i]])));
 
 	const polybool = new PolyBool();
@@ -68,16 +67,7 @@ test('3', () => {
 		[3, 1], // G
 	]];
 
-	const labels = [
-		'A',
-		'B',
-		'C',
-		'D',
-		'E',
-		'F',
-		'G',
-	];
-
+	const labels = 'ABCDEFG';
 	setPointMap(Object.fromEntries(poly.flat().map(([x, y], i) => [`${x}:${y}`, labels[i]])));
 
 	const polybool = new PolyBool();
@@ -103,16 +93,7 @@ test('3.5', () => {
 		[3, 4 - 1], // G
 	]];
 
-	const labels = [
-		'A',
-		'B',
-		'C',
-		'D',
-		'E',
-		'F',
-		'G',
-	];
-
+	const labels = 'ABCDEFG';
 	setPointMap(Object.fromEntries(poly.flat().map(([x, y], i) => [`${x}:${y}`, labels[i]])));
 
 	const polybool = new PolyBool();
@@ -147,7 +128,7 @@ test('4', () => {
 		[587977.1250356813, 6480900.408498759],
 	]];
 
-	const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
+	const labels = 'ABCDEFGHIJKLMNOP';
 
 	setPointMap(Object.fromEntries(poly.flat().map(([x, y], i) => [`${x}:${y}`, labels[i]])));
 
@@ -162,27 +143,24 @@ test('4', () => {
 	assert.strictEqual(result[0].map(pointLabel).join(''), 'LKJIHGFEDCBAPONM');
 });
 
-test.only('5', () => {
+test('5', () => {
 	/** @type {Vec2[][]} */
 	const poly = [
 		[
-			[9.0357337203, 6488655.551446969], // A
-			[19.41, 6488661.71], // B
-			[19.79, 6488661.45], // C
-			[17, 6488651.777507303], // D
+			[2.0357337203, 6488655.551446969], // A
+			[12.41, 6488661.71], // B
+			[13, 6488661.71], // C
+			[10, 6488655.551446969], // D
 		],
 		[
-			[19.41, 6488661.71], // B
-			[8.4611051541, 6488655.210325929], // E
-			// [96.4023300858, 6488659.525609329], // F
-			[0, 6488658.49831],
+			[12.41, 6488661.71], // B
+			[1.4611051541, 6488655.210325929], // E
+			[1.4611051541, 6488661.71], // F
 		],
 	];
 
-	const labelList = 'ABCDEFG';
-
-	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labelList[i]])));
-
+	const labels = 'ABCDEFG';
+	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
 	toGeogebra(poly);
 
 	const polybool = new PolyBool();
@@ -190,21 +168,14 @@ test.only('5', () => {
 	const result = polybool.union(
 		{ regions: poly, inverted: false },
 		{ regions: poly, inverted: false },
-	).regions;
+	);
 
-	toGeogebra(result);
-
-	assert.strictEqual(result.length, 1);
-	assert.strictEqual(result[0].map(pointLabel).join(''), 'BFE[9.035733720684842, 6488655.551446969]DC');
-
-	/** @type {import('@arbendium/polybool').Segments} */
-	let normalizedSegments = { segments: [], inverted: false };
+	assert.strictEqual(result.inverted, false);
+	assert.strictEqual(result.regions.length, 1);
+	assert.strictEqual(result.regions[0].map(pointLabel).join(''), 'FE[2.035733720992035, 6488655.551446969]AB[2.035733720992035, 6488655.551446969]DC');
 
 	const normalizedRegion1 = polybool.segments({ regions: [poly[0]], inverted: false });
 	const normalizedRegion2 = polybool.segments({ regions: [poly[1]], inverted: false });
-
-	console.log('Combining');
-
 	const combined = polybool.combine(normalizedRegion1, normalizedRegion2);
 
 	assert.deepStrictEqual(normalizedRegion1.segments.map(seg => `${segLabel(seg.data)}   fill=${seg.myFill.above}/${seg.myFill.below}`), [
@@ -214,30 +185,157 @@ test.only('5', () => {
 		'B -> C   fill=false/true',
 	]);
 	assert.deepStrictEqual(normalizedRegion2.segments.map(seg => `${segLabel(seg.data)}   fill=${seg.myFill.above}/${seg.myFill.below}`), [
-		'F -> E   fill=true/false',
+		'E -> F   fill=false/true',
 		'E -> B   fill=true/false',
 		'F -> B   fill=false/true',
 	]);
-
 	assert.deepStrictEqual(combined.segments.map(seg => `${segLabel(seg.data)}   myFill=${seg.myFill.above}/${seg.myFill.below}  otherFill=${seg.otherFill?.above}/${seg.otherFill?.below}`), [
-		'F -> E   myFill=false/false  otherFill=true/false',
-		'E -> [9.035733720684842, 6488655.551446969]   myFill=false/false  otherFill=true/false',
-		'A -> [9.035733720684842, 6488655.551446969]   myFill=true/false  otherFill=false/false',
-		'[9.035733720684842, 6488655.551446969] -> D   myFill=true/false  otherFill=false/false',
-		'[9.035733720684842, 6488655.551446969] -> B   myFill=true/true  otherFill=true/false',
+		'E -> F   myFill=false/false  otherFill=false/true',
+		'E -> [2.035733720992035, 6488655.551446969]   myFill=false/false  otherFill=true/false',
+		'A -> [2.035733720992035, 6488655.551446969]   myFill=true/false  otherFill=true/true',
+		'[2.035733720992035, 6488655.551446969] -> D   myFill=true/false  otherFill=false/false',
+		'[2.035733720992035, 6488655.551446969] -> B   myFill=true/true  otherFill=true/false',
 		'A -> B   myFill=false/true  otherFill=true/true',
 		'F -> B   myFill=false/false  otherFill=false/true',
 		'D -> C   myFill=true/false  otherFill=false/false',
 		'B -> C   myFill=false/true  otherFill=false/false',
 	]);
 
-	normalizedSegments = polybool.selectUnion(combined);
+	const normalizedGeometry = polybool.polygon(polybool.selectUnion(combined));
 
-	const normalizedGeometry = polybool.polygon(normalizedSegments);
+	assert.strictEqual(normalizedGeometry.inverted, false);
+	assert.strictEqual(normalizedGeometry.regions.length, 1);
+	assert.strictEqual(normalizedGeometry.regions[0].map(pointLabel).join(''), 'FE[2.035733720992035, 6488655.551446969]DC');
+});
 
-	console.log(normalizedGeometry);
+test.skip('6', () => {
+	/** @type {Vec2[][]} */
+	const poly = [
+		[
+			[2, 4], // A
+			[6, 4], // B
+			[5, 2], // H
+		],
+		[
+			[0, 0], // L
+			[2, 4], // A
+			[6, 0], // P
+		],
+	];
 
-	assert.notStrictEqual(normalizedGeometry.regions.length, 0);
+	const labels = 'ABHLP';
+	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
+	toGeogebra(poly);
+
+	const polybool = new PolyBool();
+
+	const normalizedRegion1 = polybool.segments({ regions: [poly[0]], inverted: false });
+	const normalizedRegion2 = polybool.segments({ regions: [poly[1]], inverted: false });
+
+	assert.deepStrictEqual(normalizedRegion1.segments.map(seg => `${segLabel(seg.data)}   fill=${seg.myFill.above}/${seg.myFill.below}`), [
+		'A -> H   fill=true/false',
+		'H -> B   fill=true/false',
+		'A -> B   fill=false/true',
+	]);
+	assert.deepStrictEqual(normalizedRegion2.segments.map(seg => `${segLabel(seg.data)}   fill=${seg.myFill.above}/${seg.myFill.below}`), [
+		'L -> A   fill=false/true',
+		'L -> P   fill=true/false',
+		'A -> P   fill=false/true',
+	]);
+
+	const combined = polybool.combine(normalizedRegion1, normalizedRegion2);
+
+	assert.deepStrictEqual(combined.segments.map(seg => `${segLabel(seg.data)}   myFill=${seg.myFill.above}/${seg.myFill.below}  otherFill=${seg.otherFill?.above}/${seg.otherFill?.below}`), [
+		'L -> A   myFill=false/false  otherFill=false/true',
+		'A -> H   myFill=true/false  otherFill=false/false',
+		'L -> P   myFill=false/false  otherFill=true/false',
+		'A -> P   myFill=false/false  otherFill=false/true',
+		'H -> B   myFill=true/false  otherFill=false/false',
+		'A -> B   myFill=false/true  otherFill=false/false',
+	]);
+
+	const selected = polybool.selectUnion(combined);
+
+	const normalizedGeometry = polybool.polygon(selected);
+
+	assert.strictEqual(normalizedGeometry.inverted, false);
+	assert.strictEqual(normalizedGeometry.regions.length, 1);
+	assert.strictEqual(normalizedGeometry.regions[0].map(pointLabel).join(''), 'HALPAB');
+
+	try {
+		assert.strictEqual(
+			Math.abs(polygonArea(poly[0])) + Math.abs(polygonArea(poly[1])),
+			normalizedGeometry.regions.reduce((a, r) => a + polygonArea(r), 0),
+		);
+	} catch (e) {
+		console.log(Math.abs(polygonArea(poly[0])) + Math.abs(polygonArea(poly[1])));
+		console.log(normalizedGeometry.regions.reduce((a, r) => a + polygonArea(r), 0));
+		console.log('shit');
+
+		throw e;
+	}
+});
+
+test('7', () => {
+	/** @type {Vec2[][]} */
+	const poly = [[
+		[625803.07, 6497216.08], // A
+		[625694.68, 6497146.62], // B
+		[625744.21, 6497132.16], // C
+		[625736.0738600261, 6497134.535299496], // D
+		[625778.5867819233, 6497091.1383181475], // E
+	]];
+
+	const labels = 'ABCDE';
+	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
+	toGeogebra(poly);
+
+	const polybool = new PolyBool(2 ** -10);
+
+	const normalizedRegions = polybool.normalize(poly);
+
+	assert.strictEqual(normalizedRegions.length, 1);
+	assert.strictEqual(normalizedRegions[0].map(pointLabel).join(''), 'BDEA');
+});
+
+test('8', () => {
+	/** @type {Vec2[][]} */
+	const poly = [[
+		[623027.4021508485, 6556705.085067615], // A
+		[623027.4021509635, 6556705.085067808], // B
+		[623027.4021507857, 6556705.085069574], // C
+	]];
+
+	const labels = 'ABC';
+	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
+	toGeogebra(poly);
+
+	const polybool = new PolyBool(2 ** -10);
+
+	const normalizedRegions = polybool.normalize(poly);
+
+	assert.strictEqual(normalizedRegions.length, 0);
+});
+test('9', () => {
+	/** @type {Vec2[][]} */
+	const poly = [[
+		[0, 0], // A
+		[0, 2], // B
+		[6.461105154128745, 5.210325929], // C
+		[0.75, 1.82], // D
+		[7.03573372028768, 5.551446969], // E
+		[8, 0], // F
+	]];
+
+	const labels = 'ABCDEF';
+	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
+	toGeogebra(poly);
+
+	const polybool = new PolyBool(2 ** -10);
+
+	const normalizedRegions = polybool.normalize(poly);
+
+	assert.strictEqual(normalizedRegions.map(region => region.map(pointLabel).join('')).join(','), 'CBAFE');
 });
 
 /**
@@ -267,4 +365,22 @@ function toGeogebra(rings) {
 
 		i++;
 	}
+}
+
+/**
+ * @param {[number, number][]} vertices
+ * @returns {number}
+ */
+function polygonArea(vertices) {
+	let a = 0;
+
+	for (let i = 0, l = vertices.length; i < l; i++) {
+		const v0 = vertices[i];
+		const v1 = vertices[i === l - 1 ? 0 : i + 1];
+
+		a += v0[0] * v1[1];
+		a -= v1[0] * v0[1];
+	}
+
+	return a / 2;
 }
