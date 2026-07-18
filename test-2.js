@@ -30,7 +30,7 @@ test('1', () => {
 	).regions;
 
 	assert.strictEqual(result.length, 1);
-	assert.strictEqual(result[0].map(pointLabel).join(''), 'ACB');
+	assert.strictEqual(result[0].map(pointLabel).join(''), 'CBA');
 });
 
 test('2', () => {
@@ -52,7 +52,7 @@ test('2', () => {
 	).regions;
 
 	assert.strictEqual(result.length, 1);
-	assert.strictEqual(result[0].map(pointLabel).join(''), 'ACB');
+	assert.strictEqual(result[0].map(pointLabel).join(''), 'BAC');
 });
 
 test('3', () => {
@@ -78,7 +78,7 @@ test('3', () => {
 	).regions;
 
 	assert.strictEqual(result.length, 1);
-	assert.strictEqual(result[0].map(pointLabel).join(''), 'FEDCBAG');
+	assert.strictEqual(result[0].map(pointLabel).join(''), 'EDCBAGF');
 });
 
 test('3.5', () => {
@@ -104,7 +104,7 @@ test('3.5', () => {
 	).regions;
 
 	assert.strictEqual(result.length, 1);
-	assert.strictEqual(result[0].map(pointLabel).join(''), 'BCDEFGA');
+	assert.strictEqual(result[0].map(pointLabel).join(''), 'CDEFGAB');
 });
 
 test('4', () => {
@@ -140,7 +140,7 @@ test('4', () => {
 	).regions;
 
 	assert.strictEqual(result.length, 1);
-	assert.strictEqual(result[0].map(pointLabel).join(''), 'LKJIHGFEDCBAPONM');
+	assert.strictEqual(result[0].map(pointLabel).join(''), 'KJIHGFEDCBAPONML');
 });
 
 test('5', () => {
@@ -295,7 +295,7 @@ test('7', () => {
 	const normalizedRegions = polybool.normalize(poly);
 
 	assert.strictEqual(normalizedRegions.length, 1);
-	assert.strictEqual(normalizedRegions[0].map(pointLabel).join(''), 'BDEA');
+	assert.strictEqual(normalizedRegions[0].map(pointLabel).join(''), 'DEAB');
 });
 
 test('8', () => {
@@ -333,9 +333,20 @@ test('9', () => {
 
 	const polybool = new PolyBool(2 ** -10);
 
+	const segments = polybool.segments({ regions: poly, inverted: false });
+
+	assert.deepStrictEqual(segments.segments.map(({ data, myFill }) => `${segLabel(data)}  fill=${myFill.above}/${myFill.below}`), [
+		'A -> B  fill=false/true',
+		'D -> C  fill=true/true',
+		'B -> C  fill=false/true',
+		'C -> E  fill=false/true',
+		'A -> F  fill=true/false',
+		'E -> F  fill=false/true',
+	]);
+
 	const normalizedRegions = polybool.normalize(poly);
 
-	assert.strictEqual(normalizedRegions.map(region => region.map(pointLabel).join('')).join(','), 'CBAFE');
+	assert.strictEqual(normalizedRegions.map(region => region.map(pointLabel).join('')).join(','), 'ECBAF');
 });
 
 /**
