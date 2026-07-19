@@ -1,4 +1,3 @@
-/// / @ts-nocheck
 import test from 'node:test';
 import assert from 'node:assert';
 /// eslint-disable-next-line import/no-relative-packages
@@ -208,22 +207,22 @@ test('5', () => {
 	assert.strictEqual(normalizedGeometry.regions[0].map(pointLabel).join(''), 'FE[2.035733720992035, 6488655.551446969]DC');
 });
 
-test.skip('6', () => {
+test('6', () => {
 	/** @type {Vec2[][]} */
 	const poly = [
 		[
 			[2, 4], // A
 			[6, 4], // B
-			[5, 2], // H
+			[5, 2], // C
 		],
 		[
-			[0, 0], // L
+			[0, 0], // D
 			[2, 4], // A
-			[6, 0], // P
+			[6, 0], // E
 		],
 	];
 
-	const labels = 'ABHLP';
+	const labels = 'ABCDE';
 	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
 	toGeogebra(poly);
 
@@ -233,24 +232,24 @@ test.skip('6', () => {
 	const normalizedRegion2 = polybool.segments({ regions: [poly[1]], inverted: false });
 
 	assert.deepStrictEqual(normalizedRegion1.segments.map(seg => `${segLabel(seg.data)}   fill=${seg.myFill.above}/${seg.myFill.below}`), [
-		'A -> H   fill=true/false',
-		'H -> B   fill=true/false',
+		'A -> C   fill=true/false',
+		'C -> B   fill=true/false',
 		'A -> B   fill=false/true',
 	]);
 	assert.deepStrictEqual(normalizedRegion2.segments.map(seg => `${segLabel(seg.data)}   fill=${seg.myFill.above}/${seg.myFill.below}`), [
-		'L -> A   fill=false/true',
-		'L -> P   fill=true/false',
-		'A -> P   fill=false/true',
+		'D -> A   fill=false/true',
+		'D -> E   fill=true/false',
+		'A -> E   fill=false/true',
 	]);
 
 	const combined = polybool.combine(normalizedRegion1, normalizedRegion2);
 
 	assert.deepStrictEqual(combined.segments.map(seg => `${segLabel(seg.data)}   myFill=${seg.myFill.above}/${seg.myFill.below}  otherFill=${seg.otherFill?.above}/${seg.otherFill?.below}`), [
-		'L -> A   myFill=false/false  otherFill=false/true',
-		'A -> H   myFill=true/false  otherFill=false/false',
-		'L -> P   myFill=false/false  otherFill=true/false',
-		'A -> P   myFill=false/false  otherFill=false/true',
-		'H -> B   myFill=true/false  otherFill=false/false',
+		'D -> A   myFill=false/false  otherFill=false/true',
+		'A -> C   myFill=true/false  otherFill=false/false',
+		'D -> E   myFill=false/false  otherFill=true/false',
+		'A -> E   myFill=false/false  otherFill=false/true',
+		'C -> B   myFill=true/false  otherFill=false/false',
 		'A -> B   myFill=false/true  otherFill=false/false',
 	]);
 
