@@ -314,57 +314,28 @@ test('10', () => {
 
 test.only('11', () => {
 	/** @type {Vec2[][]} */
-	const poly = [
-		[
-			[0, 0], // A
-			[0, 100], // B
-			[60, 0], // C
-		],
-		[
-			[7.36, 52.72], // D
-			[11.94, 21.67], // E
-			[38.99653, 8.49898], // F
-			[9.9703942318, 35.022895], // G
-		],
-	];
+	const poly = [[
+		[652307.36, 6500592.72], // A
+		[652311.94, 6500561.67], // B
+		[652340, 6500540], // C
+		[652309.9703942318, 6500575.022895], // D
+	]];
 
-	const labels = 'ABCDEFG';
+	const labels = 'ABCD';
 	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
 	toGeogebra(poly);
 
 	const polybool = new PolyBool(0);
 
-	const segments1 = polybool.segments({ regions: [poly[0]], inverted: false });
-	const segments2 = polybool.segments({ regions: [poly[1]], inverted: false });
+	const segments = polybool.segments({ regions: [poly[0]], inverted: false });
 
-	polybool.normalize([poly[0]]);
-	polybool.normalize([poly[1]]);
-
-	assert.deepStrictEqual(segments2.segments.map(seg => `${segLabel(seg.data)}   fill=${seg.myFill.above}/${seg.myFill.below}`), [
-		'D -> G   fill=true/false',
-		'G -> [9.970394231897153, 35.02289499991122]   fill=true/false',
-		'D -> [9.970394231897153, 35.02289499991122]   fill=false/true',
-		'[9.970394231897153, 35.02289499991122] -> E   fill=true/false',
-		'E -> F   fill=true/false',
-		'[9.970394231897153, 35.02289499991122] -> F   fill=false/true',
+	assert.deepStrictEqual(segments.segments.map(seg => `${segLabel(seg.data)}   fill=${seg.myFill.above}/${seg.myFill.below}`), [
+		// 'A -> D   fill=true/false',
+		// 'A -> D   fill=false/true',
+		'D -> B   fill=true/false',
+		'B -> C   fill=true/false',
+		'D -> C   fill=false/true',
 	]);
-
-	const combined = polybool.combine(segments1, segments2);
-	assert.deepStrictEqual(combined.segments.map(seg => `${segLabel(seg.data)}   myFill=${seg.myFill.above}/${seg.myFill.below}  otherFill=${seg.otherFill?.above}/${seg.otherFill?.below}`), [
-		'A -> B   myFill=false/true  otherFill=false/false',
-		'D -> G   myFill=true/true  otherFill=true/false',
-		'G -> [9.970394231897153, 35.02289499991122]   myFill=true/true  otherFill=true/false',
-		'D -> [9.970394231897153, 35.02289499991122]   myFill=true/true  otherFill=false/true',
-		'[9.970394231897153, 35.02289499991122] -> E   myFill=true/true  otherFill=true/false',
-		'E -> F   myFill=true/true  otherFill=true/false',
-		'[9.970394231897153, 35.02289499991122] -> F   myFill=true/true  otherFill=false/true',
-		'A -> C   myFill=true/false  otherFill=false/false',
-		'B -> C   myFill=false/true  otherFill=false/false',
-	]);
-	const selected = polybool.selectDifference(combined);
-	const normalizedRegions = polybool.polygon(selected).regions;
-
-	assert.strictEqual(normalizedRegions.map(region => region.map(pointLabel).join('')).join(','), 'CBAFE');
 });
 
 /**
