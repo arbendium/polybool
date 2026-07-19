@@ -80,7 +80,7 @@ test('3', () => {
 	assert.strictEqual(result[0].map(pointLabel).join(''), 'FEDCBAG');
 });
 
-test('3.5', () => {
+test('4', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[3, 4 - 0], // A
@@ -106,7 +106,7 @@ test('3.5', () => {
 	assert.strictEqual(result[0].map(pointLabel).join(''), 'BCDEFGA');
 });
 
-test('4', () => {
+test('5', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[587953.1269561613, 6480898.918962788],
@@ -142,7 +142,7 @@ test('4', () => {
 	assert.strictEqual(result[0].map(pointLabel).join(''), 'LKJIHGFEDCBAPONM');
 });
 
-test('5', () => {
+test('6', () => {
 	/** @type {Vec2[][]} */
 	const poly = [
 		[
@@ -207,7 +207,7 @@ test('5', () => {
 	assert.strictEqual(normalizedGeometry.regions[0].map(pointLabel).join(''), 'FE[2.035733720992035, 6488655.551446969]DC');
 });
 
-test('6', () => {
+test('7', () => {
 	/** @type {Vec2[][]} */
 	const poly = [
 		[
@@ -238,7 +238,7 @@ test('6', () => {
 	assert.strictEqual(normalizedGeometry.regions[0].map(pointLabel).join(''), 'DEACBA');
 });
 
-test('7', () => {
+test('8', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[625803.07, 6497216.08], // A
@@ -260,7 +260,7 @@ test('7', () => {
 	assert.strictEqual(normalizedRegions[0].map(pointLabel).join(''), 'BDEA');
 });
 
-test('8', () => {
+test('9', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[623027.4021508485, 6556705.085067615], // A
@@ -278,7 +278,8 @@ test('8', () => {
 
 	assert.strictEqual(normalizedRegions.length, 0);
 });
-test('9', () => {
+
+test('10', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[0, 0], // A
@@ -338,22 +339,4 @@ function toGeogebra(rings) {
 
 		i++;
 	}
-}
-
-/**
- * @param {[number, number][]} vertices
- * @returns {number}
- */
-function polygonArea(vertices) {
-	let a = 0;
-
-	for (let i = 0, l = vertices.length; i < l; i++) {
-		const v0 = vertices[i];
-		const v1 = vertices[i === l - 1 ? 0 : i + 1];
-
-		a += v0[0] * v1[1];
-		a -= v1[0] * v0[1];
-	}
-
-	return a / 2;
 }
