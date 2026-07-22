@@ -1506,7 +1506,6 @@ function joinLines(seg1, seg2, geo) {
     if (geo.isCollinear(seg1.p0, seg1.p1, seg2.p1)) {
         return new SegmentLine(seg1.p0, seg2.p1, geo);
     }
-    return false;
 }
 function joinCurves(seg1, seg2, geo) {
     if (geo.isCollinear(seg1.p2, seg1.p3, seg2.p1)) {
@@ -1531,19 +1530,16 @@ function joinCurves(seg1, seg2, geo) {
             }
         }
     }
-    return false;
 }
 function joinSegments(seg1, seg2, geo) {
-    if (seg1 === seg2) {
-        return false;
+    if (seg1 !== seg2) {
+        if (seg1 instanceof SegmentLine && seg2 instanceof SegmentLine) {
+            return joinLines(seg1, seg2, geo);
+        }
+        if (seg1 instanceof SegmentCurve && seg2 instanceof SegmentCurve) {
+            return joinCurves(seg1, seg2, geo);
+        }
     }
-    if (seg1 instanceof SegmentLine && seg2 instanceof SegmentLine) {
-        return joinLines(seg1, seg2, geo);
-    }
-    if (seg1 instanceof SegmentCurve && seg2 instanceof SegmentCurve) {
-        return joinCurves(seg1, seg2, geo);
-    }
-    return false;
 }
 function SegmentChainer(segments, geo, log) {
     const closedChains = [];
@@ -1634,47 +1630,36 @@ function SegmentChainer(segments, geo, log) {
             // we matched a single chain
             const index = firstMatch.index;
             log === null || log === void 0 ? void 0 : log.chainMatch(index, closed);
-            // add the other point to the apporpriate end
+            // add the other point to the apporpriate end and simplify
             const { segs: chain, fill } = chains[index];
             if (firstMatch.matchesHead) {
                 if (firstMatch.matchesPt1) {
                     seg = seg.reverse();
-                    log === null || log === void 0 ? void 0 : log.chainAddHead(index, { seg, fill }, closed);
-                    chain.unshift(seg);
                 }
-                else {
-                    log === null || log === void 0 ? void 0 : log.chainAddHead(index, { seg, fill }, closed);
-                    chain.unshift(seg);
-                }
-            }
-            else {
-                if (firstMatch.matchesPt1) {
-                    log === null || log === void 0 ? void 0 : log.chainAddTail(index, { seg, fill }, closed);
-                    chain.push(seg);
-                }
-                else {
-                    seg = seg.reverse();
-                    log === null || log === void 0 ? void 0 : log.chainAddTail(index, { seg, fill }, closed);
-                    chain.push(seg);
-                }
-            }
-            // simplify chain
-            if (firstMatch.matchesHead) {
-                const next = chain[1];
+                log === null || log === void 0 ? void 0 : log.chainAddHead(index, { seg, fill }, closed);
+                const next = chain[0];
                 const newSeg = joinSegments(seg, next, geo);
-                if (newSeg) {
-                    chain.shift();
+                if (newSeg != null) {
                     chain[0] = newSeg;
                     log === null || log === void 0 ? void 0 : log.chainSimplifyHead(index, { seg: newSeg, fill }, closed);
                 }
+                else {
+                    chain.unshift(seg);
+                }
             }
             else {
-                const next = chain[chain.length - 2];
+                if (!firstMatch.matchesPt1) {
+                    seg = seg.reverse();
+                }
+                log === null || log === void 0 ? void 0 : log.chainAddTail(index, { seg, fill }, closed);
+                const next = chain[chain.length - 1];
                 const newSeg = joinSegments(next, seg, geo);
-                if (newSeg) {
-                    chain.pop();
+                if (newSeg != null) {
                     chain[chain.length - 1] = newSeg;
                     log === null || log === void 0 ? void 0 : log.chainSimplifyTail(index, { seg: newSeg, fill }, closed);
+                }
+                else {
+                    chain.push(seg);
                 }
             }
             // check for closed chain
@@ -1700,7 +1685,7 @@ function SegmentChainer(segments, geo, log) {
                         segE = finalChain[finalChain.length - 1];
                     }
                     const newStart = joinSegments(segE, segS, geo);
-                    if (newStart) {
+                    if (newStart != null) {
                         finalChain.pop();
                         finalChain[0] = newStart;
                         log === null || log === void 0 ? void 0 : log.chainSimplifyClose(index, { seg: newStart, fill }, closed);
@@ -1718,22 +1703,23 @@ function SegmentChainer(segments, geo, log) {
                 // index1 gets index2 appended to it, and index2 is removed
                 const { segs: chain1, fill } = chains[index1];
                 const { segs: chain2 } = chains[index2];
-                // add seg to chain1's tail
+                // add seg to chain1's tail and simplify
                 log === null || log === void 0 ? void 0 : log.chainAddTail(index1, { seg, fill }, closed);
-                chain1.push(seg);
-                // simplify chain1's tail
-                const next = chain1[chain1.length - 2];
+                const next = chain1[chain1.length - 1];
                 const newEnd = joinSegments(next, seg, geo);
-                if (newEnd) {
+                if (newEnd != null) {
                     chain1.pop();
                     chain1[chain1.length - 1] = newEnd;
                     log === null || log === void 0 ? void 0 : log.chainSimplifyTail(index1, { seg: newEnd, fill }, closed);
+                }
+                else {
+                    chain1.push(seg);
                 }
                 // simplify chain2's head
                 const tail = chain1[chain1.length - 1];
                 const head = chain2[0];
                 const newJoin = joinSegments(tail, head, geo);
-                if (newJoin) {
+                if (newJoin != null) {
                     chain2.shift();
                     chain1[chain1.length - 1] = newJoin;
                     log === null || log === void 0 ? void 0 : log.chainSimplifyJoin(index1, index2, { seg: newJoin, fill }, closed);

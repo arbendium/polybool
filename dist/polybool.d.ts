@@ -30,9 +30,9 @@ interface IPolyBoolReceiver {
     bezierCurveTo: (cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number) => void;
     closePath: () => void;
 }
-declare function joinLines(seg1: SegmentLine, seg2: SegmentLine, geo: Geometry): SegmentLine | false;
-declare function joinCurves(seg1: SegmentCurve, seg2: SegmentCurve, geo: Geometry): SegmentCurve | false;
-declare function joinSegments(seg1: Segment | undefined, seg2: Segment | undefined, geo: Geometry): Segment | false;
+declare function joinLines(seg1: SegmentLine, seg2: SegmentLine, geo: Geometry): SegmentLine | undefined;
+declare function joinCurves(seg1: SegmentCurve, seg2: SegmentCurve, geo: Geometry): SegmentCurve | undefined;
+declare function joinSegments(seg1: Segment | undefined, seg2: Segment | undefined, geo: Geometry): Segment | undefined;
 declare function SegmentChainer(segments: SegmentBool[], geo: Geometry, log: BuildLog | null): Segment[][];
 declare function segmentsToReceiver<T extends IPolyBoolReceiver>(segments: Segment[][], geo: Geometry, receiver: T, matrix: Vec6): T;
 
