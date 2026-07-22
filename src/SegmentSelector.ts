@@ -9,8 +9,8 @@ import {
   type SegmentBool,
   SegmentBoolLine,
   SegmentBoolCurve,
-} from "./Intersecter";
-import type BuildLog from "./BuildLog";
+} from "./Intersecter.ts";
+import type BuildLog from "./BuildLog.ts";
 
 //
 // filter a list of segments based on boolean operations

@@ -632,7 +632,10 @@ function recalc(){
       'Intersect' : (a, b) => polybool.intersect(a, b),
       'Union'     : (a, b) => polybool.union(a, b),
       'Red - Blue': (a, b) => polybool.difference(a, b),
-      'Blue - Red': (a, b) => polybool.differenceRev(a, b),
+      'Blue - Red': (a, b) => {
+        debugger
+        return polybool.differenceRev(a, b)
+      },
       'Xor'       : (a, b) => polybool.xor(a, b)
     })[mode];
     var BL = polybool.buildLog(true);

@@ -5,10 +5,10 @@
 // SPDX-License-Identifier: 0BSD
 //
 
-import { type Geometry, type Vec6 } from "./Geometry";
-import { type SegmentBool } from "./Intersecter";
-import type BuildLog from "./BuildLog";
-import { type Segment, SegmentLine, SegmentCurve } from "./Segment";
+import { type Geometry, type Vec6 } from './Geometry.ts';
+import { type SegmentBool } from './Intersecter.ts';
+import type BuildLog from './BuildLog.ts';
+import { type Segment, SegmentLine, SegmentCurve } from './Segment.ts';
 
 //
 // converts a list of segments into a list of regions, while also removing

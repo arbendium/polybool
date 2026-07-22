@@ -5,9 +5,9 @@
 // SPDX-License-Identifier: 0BSD
 //
 
-import { type SegmentBool } from "./Intersecter";
-import { type Vec2 } from "./Geometry";
-import { type Segment } from "./Segment";
+import { type SegmentBool } from "./Intersecter.ts";
+import { type Vec2 } from "./Geometry.ts";
+import { type Segment } from "./Segment.ts";
 
 export default class BuildLog {
   list: Array<{ type: string; data: unknown }> = [];

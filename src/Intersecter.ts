@@ -5,14 +5,14 @@
 // SPDX-License-Identifier: 0BSD
 //
 
-import { type Vec2, type Geometry } from "./Geometry";
-import type BuildLog from "./BuildLog";
+import { type Vec2, type Geometry } from "./Geometry.ts";
+import type BuildLog from "./BuildLog.ts";
 import {
   type Segment,
   SegmentLine,
   SegmentCurve,
   segmentsIntersect,
-} from "./Segment";
+} from "./Segment.ts";
 
 export interface SegmentBoolFill {
   above: boolean | null;
@@ -689,6 +689,8 @@ export class Intersecter {
           ev.seg.myFill = ev.seg.otherFill;
           ev.seg.otherFill = s;
         }
+
+        console.log('Adding output segment: '+segLabel(ev.seg.data))
         segments.push(ev.seg);
       }
 

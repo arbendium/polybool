@@ -10,16 +10,16 @@ import {
   type Vec6,
   type Geometry,
   GeometryEpsilon,
-} from "./Geometry";
-import { Shape, type ShapeCombined } from "./Shape";
-import BuildLog from "./BuildLog";
-export * from "./Segment";
-export * from "./Geometry";
-export * from "./Intersecter";
-export * from "./SegmentSelector";
-export * from "./SegmentChainer";
-export * from "./Shape";
-export * from "./BuildLog";
+} from "./Geometry.ts";
+import { Shape, type ShapeCombined } from "./Shape.ts";
+import BuildLog from "./BuildLog.ts";
+export * from "./Segment.ts";
+export * from "./Geometry.ts";
+export * from "./Intersecter.ts";
+export * from "./SegmentSelector.ts";
+export * from "./SegmentChainer.ts";
+export * from "./Shape.ts";
+export * from "./BuildLog.ts";
 
 export interface Polygon {
   regions: Array<Array<Vec2 | Vec6>>;

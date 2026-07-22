@@ -5,16 +5,16 @@
 // SPDX-License-Identifier: 0BSD
 //
 
-import { type Geometry, type Vec2, type Vec6 } from "./Geometry";
-import type BuildLog from "./BuildLog";
-import { type SegmentBool, Intersecter, copySegmentBool } from "./Intersecter";
-import { SegmentSelector } from "./SegmentSelector";
+import { type Geometry, type Vec2, type Vec6 } from "./Geometry.ts";
+import type BuildLog from "./BuildLog.ts";
+import { type SegmentBool, Intersecter, copySegmentBool } from "./Intersecter.ts";
+import { SegmentSelector } from "./SegmentSelector.ts";
 import {
   SegmentChainer,
   segmentsToReceiver,
   type IPolyBoolReceiver,
-} from "./SegmentChainer";
-import { type Segment } from "./Segment";
+} from "./SegmentChainer.ts";
+import { type Segment } from "./Segment.ts";
 
 interface IPathStateCommon<K extends string> {
   kind: K;

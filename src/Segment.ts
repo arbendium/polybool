@@ -10,8 +10,8 @@ import {
   type Geometry,
   lerpVec2,
   boundingBoxesIntersect,
-} from "./Geometry";
-import { type IPolyBoolReceiver } from "./SegmentChainer";
+} from "./Geometry.ts";
+import { type IPolyBoolReceiver } from "./SegmentChainer.ts";
 
 export interface SegmentTValuePairs {
   kind: "tValuePairs";
