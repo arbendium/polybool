@@ -279,7 +279,7 @@ describe('touching polygons', () => {
 			{ regions: [poly[1]], inverted: false },
 		);
 
-		assertShape(result, 'ADE,ACB');
+		assertShape(result, 'ADEACB');
 	});
 
 	test('10', () => {
@@ -307,11 +307,39 @@ describe('touching polygons', () => {
 			{ regions: [poly[1]], inverted: false },
 		);
 
-		assertShape(result, 'ACB,ADE');
+		assertShape(result, 'ACBADE');
+	});
+
+	test('11', () => {
+		/** @type {Vec2[][]} */
+		const poly = [
+			[
+				[2, 4], // A
+				[5, 4], // B
+				[7, 3], // C
+			],
+			[
+				[6, 0], // D
+				[2, 4], // A
+				[8, 0], // E
+			],
+		];
+
+		const labels = 'ABCDE';
+		setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
+
+		const polybool = new PolyBool();
+
+		const result = polybool.union(
+			{ regions: [poly[0]], inverted: false },
+			{ regions: [poly[1]], inverted: false },
+		);
+
+		assertShape(result, 'ACBADE');
 	});
 });
 
-test('11', () => {
+test('12', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[625803.07, 6497216.08], // A
@@ -331,7 +359,7 @@ test('11', () => {
 	assertRegions(result, 'BDEA');
 });
 
-test('12', () => {
+test('13', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[623027.4021508485, 6556705.085067615], // A
@@ -349,7 +377,7 @@ test('12', () => {
 	assertRegions(result, '');
 });
 
-test('13', () => {
+test('14', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[0, 0], // A
@@ -381,7 +409,7 @@ test('13', () => {
 	assertRegions(result, 'ECBAF');
 });
 
-test.skip('11', () => {
+test.skip('15', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[652307.36, 6500592.72], // A
