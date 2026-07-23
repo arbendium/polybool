@@ -1,8 +1,8 @@
-import test from 'node:test';
+import test, { describe } from 'node:test';
 import assert from 'node:assert';
 /// eslint-disable-next-line import/no-relative-packages
 // import { PolyBool } from './upstream/main/src/polybool.ts';
-import { PolyBool } from './lib/polybool.js';
+import { PolyBool, Segment } from './lib/polybool.js';
 import { pointLabel, segLabel, setPointMap } from './lib/pointMap.js';
 
 /**
@@ -18,7 +18,6 @@ test('1', () => {
 	]];
 
 	const labels = 'ABC';
-
 	setPointMap(Object.fromEntries(poly.flat().map(([x, y], i) => [`${x}:${y}`, labels[i]])));
 
 	const polybool = new PolyBool();
@@ -26,10 +25,9 @@ test('1', () => {
 	const result = polybool.union(
 		{ regions: poly, inverted: false },
 		{ regions: poly, inverted: false },
-	).regions;
+	);
 
-	assert.strictEqual(result.length, 1);
-	assert.strictEqual(result[0].map(pointLabel).join(''), 'ACB');
+	assertShape(result, 'ACB');
 });
 
 test('2', () => {
@@ -48,10 +46,9 @@ test('2', () => {
 	const result = polybool.union(
 		{ regions: poly, inverted: false },
 		{ regions: poly, inverted: false },
-	).regions;
+	);
 
-	assert.strictEqual(result.length, 1);
-	assert.strictEqual(result[0].map(pointLabel).join(''), 'BAC');
+	assertShape(result, 'BAC');
 });
 
 test('3', () => {
@@ -74,10 +71,9 @@ test('3', () => {
 	const result = polybool.union(
 		{ regions: poly, inverted: false },
 		{ regions: poly, inverted: false },
-	).regions;
+	);
 
-	assert.strictEqual(result.length, 1);
-	assert.strictEqual(result[0].map(pointLabel).join(''), 'FEDCBAG');
+	assertShape(result, 'FEDCBAG');
 });
 
 test('4', () => {
@@ -100,10 +96,10 @@ test('4', () => {
 	const result = polybool.union(
 		{ regions: poly, inverted: false },
 		{ regions: poly, inverted: false },
-	).regions;
+	);
 
-	assert.strictEqual(result.length, 1);
-	assert.strictEqual(result[0].map(pointLabel).join(''), 'BCDEFGA');
+	assert.strictEqual(result.inverted, false);
+	assert.strictEqual(result.regions.map(region => region.map(pointLabel).join('')).join(','), 'BCDEFGA');
 });
 
 test('5', () => {
@@ -136,10 +132,9 @@ test('5', () => {
 	const result = polybool.union(
 		{ regions: poly, inverted: false },
 		{ regions: poly, inverted: false },
-	).regions;
+	);
 
-	assert.strictEqual(result.length, 1);
-	assert.strictEqual(result[0].map(pointLabel).join(''), 'LKJIHGFEDCBAPONM');
+	assertShape(result, 'LKJIHGFEDCBAPONM');
 });
 
 test('6', () => {
@@ -160,7 +155,6 @@ test('6', () => {
 
 	const labels = 'ABCDEFG';
 	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
-	toGeogebra(poly);
 
 	const polybool = new PolyBool();
 
@@ -169,9 +163,7 @@ test('6', () => {
 		{ regions: poly, inverted: false },
 	);
 
-	assert.strictEqual(result.inverted, false);
-	assert.strictEqual(result.regions.length, 1);
-	assert.strictEqual(result.regions[0].map(pointLabel).join(''), 'FE[2.035733720992035, 6488655.551446969]AB[2.035733720992035, 6488655.551446969]DC');
+	assertShape(result, 'FE[2.035733720992035, 6488655.551446969]AB[2.035733720992035, 6488655.551446969]DC');
 
 	const normalizedRegion1 = polybool.segments({ regions: [poly[0]], inverted: false });
 	const normalizedRegion2 = polybool.segments({ regions: [poly[1]], inverted: false });
@@ -202,43 +194,124 @@ test('6', () => {
 
 	const normalizedGeometry = polybool.polygon(polybool.selectUnion(combined));
 
-	assert.strictEqual(normalizedGeometry.inverted, false);
-	assert.strictEqual(normalizedGeometry.regions.length, 1);
-	assert.strictEqual(normalizedGeometry.regions[0].map(pointLabel).join(''), 'FE[2.035733720992035, 6488655.551446969]DC');
+	assertShape(normalizedGeometry, 'FE[2.035733720992035, 6488655.551446969]DC');
 });
 
-test('7', () => {
-	/** @type {Vec2[][]} */
-	const poly = [
-		[
-			[2, 4], // A
-			[6, 4], // B
-			[5, 2], // C
-		],
-		[
-			[0, 0], // D
-			[2, 4], // A
-			[6, 0], // E
-		],
-	];
+describe('touching polygons', () => {
+	test('7', () => {
+		/** @type {Vec2[][]} */
+		const poly = [
+			[
+				[2, 4], // A
+				[7, 4], // B
+				[5, 3], // C
+			],
+			[
+				[0, 0], // D
+				[2, 4], // A
+				[1, 0], // E
+			],
+		];
 
-	const labels = 'ABCDE';
-	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
-	toGeogebra(poly);
+		const labels = 'ABCDE';
+		setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
 
-	const polybool = new PolyBool();
+		const polybool = new PolyBool();
 
-	const normalizedGeometry = polybool.union(
-		{ regions: [poly[0]], inverted: false },
-		{ regions: [poly[1]], inverted: false },
-	);
+		const result = polybool.union(
+			{ regions: [poly[0]], inverted: false },
+			{ regions: [poly[1]], inverted: false },
+		);
 
-	assert.strictEqual(normalizedGeometry.inverted, false);
-	assert.strictEqual(normalizedGeometry.regions.length, 1);
-	assert.strictEqual(normalizedGeometry.regions[0].map(pointLabel).join(''), 'ADEACB');
+		assertShape(result, 'DEA,ACB');
+	});
+
+	test('8', () => {
+		/** @type {Vec2[][]} */
+		const poly = [
+			[
+				[2, 4], // A
+				[7, 4], // B
+				[5, 3], // C
+			],
+			[
+				[0, 0], // D
+				[2, 4], // A
+				[3, 0], // E
+			],
+		];
+
+		const labels = 'ABCDE';
+		setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
+
+		const polybool = new PolyBool();
+
+		const result = polybool.union(
+			{ regions: [poly[0]], inverted: false },
+			{ regions: [poly[1]], inverted: false },
+		);
+
+		assertShape(result, 'ADE,ACB');
+	});
+
+	test('9', () => {
+		/** @type {Vec2[][]} */
+		const poly = [
+			[
+				[2, 4], // A
+				[7, 4], // B
+				[5, 3], // C
+			],
+			[
+				[0, 0], // D
+				[2, 4], // A
+				[6, 0], // E
+			],
+		];
+
+		const labels = 'ABCDE';
+		setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
+
+		const polybool = new PolyBool();
+
+		const result = polybool.union(
+			{ regions: [poly[0]], inverted: false },
+			{ regions: [poly[1]], inverted: false },
+		);
+
+		assertShape(result, 'ADE,ACB');
+	});
+
+	test('10', () => {
+		/** @type {Vec2[][]} */
+		const poly = [
+			[
+				[2, 4], // A
+				[7, 4], // B
+				[5, 3], // C
+			],
+			[
+				[0, 0], // D
+				[2, 4], // A
+				[8, 0], // E
+			],
+		];
+
+		const labels = 'ABCDE';
+		setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
+
+		const polybool = new PolyBool();
+
+		const result = polybool.union(
+			{ regions: [poly[0]], inverted: false },
+			{ regions: [poly[1]], inverted: false },
+		);
+
+		assertShape(result, 'ACB,ADE');
+	});
 });
 
-test('8', () => {
+test('11', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[625803.07, 6497216.08], // A
@@ -250,17 +323,15 @@ test('8', () => {
 
 	const labels = 'ABCDE';
 	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
-	toGeogebra(poly);
 
 	const polybool = new PolyBool(2 ** -10);
 
-	const normalizedRegions = polybool.normalize(poly);
+	const result = polybool.normalize(poly);
 
-	assert.strictEqual(normalizedRegions[0].map(pointLabel).join(''), 'BDEA');
-	assert.strictEqual(normalizedRegions.map(region => region.map(pointLabel).join('')).join(','), 'BDEA');
+	assertRegions(result, 'BDEA');
 });
 
-test('9', () => {
+test('12', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[623027.4021508485, 6556705.085067615], // A
@@ -270,16 +341,15 @@ test('9', () => {
 
 	const labels = 'ABC';
 	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
-	toGeogebra(poly);
 
 	const polybool = new PolyBool(2 ** -10);
 
-	const normalizedRegions = polybool.normalize(poly);
+	const result = polybool.normalize(poly);
 
-	assert.strictEqual(normalizedRegions.length, 0);
+	assertRegions(result, '');
 });
 
-test('10', () => {
+test('13', () => {
 	/** @type {Vec2[][]} */
 	const poly = [[
 		[0, 0], // A
@@ -292,7 +362,6 @@ test('10', () => {
 
 	const labels = 'ABCDEF';
 	setPointMap(Object.fromEntries([...new Set(poly.flat().map(([x, y]) => `${x}:${y}`))].map((key, i) => [key, labels[i]])));
-	toGeogebra(poly);
 
 	const polybool = new PolyBool(2 ** -10);
 
@@ -307,9 +376,9 @@ test('10', () => {
 		'E -> F  fill=false/true',
 	]);
 
-	const normalizedRegions = polybool.normalize(poly);
+	const result = polybool.normalize(poly);
 
-	assert.strictEqual(normalizedRegions.map(region => region.map(pointLabel).join('')).join(','), 'ECBAF');
+	assertRegions(result, 'ECBAF');
 });
 
 test.skip('11', () => {
@@ -365,6 +434,23 @@ function toGeogebra(rings) {
 
 		i++;
 	}
+}
+
+/**
+ * @param {Vec2[][]} regions
+ * @param {string} polygon
+ */
+function assertRegions(regions, polygon) {
+	assert.strictEqual(regions.map(region => region.map(pointLabel).join('')).join(','), polygon);
+}
+
+/**
+ * @param {{ regions: Vec2[][], inverted: boolean }} shape
+ * @param {string} polygon
+ */
+function assertShape(shape, polygon) {
+	assert.strictEqual(shape.inverted, false);
+	assertRegions(shape.regions, polygon);
 }
 
 /**
