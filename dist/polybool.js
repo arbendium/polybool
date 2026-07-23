@@ -1563,18 +1563,12 @@ function SegmentChainer(segments, geo, log) {
             const startMatch = geo.isEqualVec2(tail, pt1);
             const endMatch = geo.isEqualVec2(head, pt2);
             if (startMatch || endMatch) {
-                // If the segment matches a chain at both ends then we want to close the chain regardless of
-                // any other matches.
-                if (startMatch && endMatch) {
-                    firstMatch = { index: i, startMatch, endMatch };
-                    secondMatch = undefined;
-                    break;
-                }
                 if (firstMatch == null) {
                     firstMatch = { index: i, startMatch, endMatch };
                 }
-                else if (secondMatch == null) {
+                else {
                     secondMatch = { index: i, startMatch, endMatch };
+                    break;
                 }
             }
         }
